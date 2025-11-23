@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+<h1>כמה זה באמת עולה לי ?</h1>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#3b82f6" />
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+    }
+	.logo-container {
+  text-align: center;
+  margin-bottom: 6px; /* רווח מאוד קטן, שורה אחת */
+}
+
+.logo-img {
+  width: 360px; /* היה 240 — עכשיו גודל 150 אחוז נוספים */
+  max-width: 85%;
+  height: auto;
+  display: inline-block;
+}
+
+
+
+    .app-container {
+      max-width: 900px;
+      margin: 30px auto;
+      background: #ffffff;
+      padding: 20px 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    }
+
+h1 {
+  margin-top: 0;
+  margin-bottom: 6px; /* רווח מינימלי בלבד */
+  text-align: center;
+  color: #111827;
+  font-size: 1.7rem;
+  line-height: 1.2;
+}
+
+
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    .items-table th, .items-table td {
+      padding: 8px 6px;
+      text-align: center;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .items-table th {
+      background: #f9fafb;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .items-table input[type="number"],
+    .items-table input[type="text"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 6px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .items-table input[type="number"]:focus,
+    .items-table input[type="text"]:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 1px #bfdbfe;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-top: 10px;
+      transition: transform 0.05s ease, box-shadow 0.1s ease, background-color 0.15s ease;
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(59,130,246,0.4);
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+      box-shadow: none;
+    }
+
+    .btn-small {
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      box-shadow: none;
+      margin-top: 0;
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-top: 16px;
+    }
+
+    .controls-row .btn {
+      margin-top: 0;
+    }
+
+    .summary {
+      margin-top: 20px;
+      padding-top: 12px;
+      border-top: 1px solid #e5e7eb;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .summary-item {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .summary-item span.label {
+      display: block;
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-bottom: 2px;
+    }
+
+    .summary-item span.value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .summary-item.highlight {
+      background: #ecfdf5;
+    }
+
+    .summary-item.highlight span.value {
+      font-size: 1.1rem;
+      color: #16a34a;
+    }
+
+    .error-message {
+      margin-top: 8px;
+      color: #b91c1c;
+      font-size: 0.85rem;
+      min-height: 1em;
+    }
+
+    @media (max-width: 600px) {
+      .items-table th, .items-table td {
+        font-size: 0.8rem;
+        padding: 6px 4px;
+      }
+
+      .app-container {
+        margin: 10px;
+        padding: 14px;
+      }
+    }
+
+    /* עיצוב ידידותי להדפסה או PDF */
+    @media print {
+      body {
+        background: #ffffff;
+      }
+      .app-container {
+        box-shadow: none;
+        margin: 0;
+        max-width: 100%;
+      }
+      .controls-row, #addItemBtn, #errorMsg {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+  <div class="logo-container">
+  <img src="לוגו MZ.png" alt="MZ Logo" class="logo-img" />
+</div>
+    <h1>מחשבון סל קניות עם הנחה פר פריט</h1>
+
+    <!-- טבלת פריטים -->
+    <table class="items-table" id="itemsTable">
+      <thead>
+        <tr>
+          <th>תיאור פריט</th>
+          <th>מחיר ליחידה (שח)</th>
+          <th>כמות</th>
+          <th>אחוז הנחה לפריט</th>
+          <th>סכום שורה לאחר הנחה (שח)</th>
+          <th>הסר</th>
+        </tr>
+      </thead>
+      <tbody id="itemsBody">
+      </tbody>
+    </table>
+
+    <button class="btn btn-secondary" id="addItemBtn">הוסף פריט</button>
+
+    <!-- כפתורים תחתונים -->
+    <div class="controls-row">
+      <button class="btn btn-primary" id="calcBtn">חישוב סופי</button>
+      <button class="btn btn-secondary" id="printBtn">הדפס או שמור כ PDF</button>
+    </div>
+
+    <div class="error-message" id="errorMsg"></div>
+
+    <!-- סיכום -->
+    <div class="summary">
+      <div class="summary-item">
+        <span class="label">סכום לפני הנחה</span>
+        <span class="value" id="subtotalDisplay">0.00 ₪</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">סך כל ההנחה</span>
+        <span class="value" id="discountAmountDisplay">0.00 ₪</span>
+      </div>
+      <div class="summary-item highlight">
+        <span class="label">סכום סופי לתשלום</span>
+        <span class="value" id="totalDisplay">0.00 ₪</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "discountCartV1";
+
+    const itemsBody = document.getElementById("itemsBody");
+    const addItemBtn = document.getElementById("addItemBtn");
+    const calcBtn = document.getElementById("calcBtn");
+    const printBtn = document.getElementById("printBtn");
+    const errorMsg = document.getElementById("errorMsg");
+
+    const subtotalDisplay = document.getElementById("subtotalDisplay");
+    const discountAmountDisplay = document.getElementById("discountAmountDisplay");
+    const totalDisplay = document.getElementById("totalDisplay");
+
+    // שמירת מצב בסל
+    function saveState() {
+      const rows = itemsBody.querySelectorAll("tr");
+      const items = [];
+      rows.forEach(row => {
+        const desc = row.querySelector(".desc-input").value || "";
+        const price = row.querySelector(".price-input").value || "0";
+        const qty = row.querySelector(".qty-input").value || "1";
+        const discount = row.querySelector(".discount-input").value || "0";
+        items.push({ desc, price, qty, discount });
+      });
+
+      const totals = {
+        subtotal: subtotalDisplay.textContent,
+        discount: discountAmountDisplay.textContent,
+        total: totalDisplay.textContent
+      };
+
+      const data = { items, totals };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    // טעינת מצב מהאחסון
+    function loadState() {
+      const dataStr = localStorage.getItem(STORAGE_KEY);
+      if (!dataStr) {
+        addItemRow(); // שורה אחת ברירת מחדל
+        return;
+      }
+
+      try {
+        const data = JSON.parse(dataStr);
+        if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+          data.items.forEach(item => {
+            addItemRow(item);
+          });
+
+          if (data.totals) {
+            subtotalDisplay.textContent = data.totals.subtotal || "0.00 ₪";
+            discountAmountDisplay.textContent = data.totals.discount || "0.00 ₪";
+            totalDisplay.textContent = data.totals.total || "0.00 ₪";
+          }
+        } else {
+          addItemRow();
+        }
+      } catch (e) {
+        console.error("Cannot parse stored data", e);
+        addItemRow();
+      }
+    }
+
+    // הוספת שורת פריט חדשה
+    function addItemRow(existingData) {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>
+          <input type="text" class="desc-input" placeholder="לדוגמה: חבילת עטים" />
+        </td>
+        <td>
+          <input type="number" class="price-input" min="0" step="0.01" value="0" />
+        </td>
+        <td>
+          <input type="number" class="qty-input" min="0" step="1" value="1" />
+        </td>
+        <td>
+          <input type="number" class="discount-input" min="0" max="100" step="0.1" value="0" />
+        </td>
+        <td class="row-total">0.00</td>
+        <td>
+          <button class="btn btn-small btn-secondary remove-btn">X</button>
+        </td>
+      `;
+
+      itemsBody.appendChild(row);
+
+      const descInput = row.querySelector(".desc-input");
+      const priceInput = row.querySelector(".price-input");
+      const qtyInput = row.querySelector(".qty-input");
+      const discountInput = row.querySelector(".discount-input");
+      const removeBtn = row.querySelector(".remove-btn");
+
+      // מילוי נתונים קיימים אם יש
+      if (existingData) {
+        descInput.value = existingData.desc || "";
+        priceInput.value = existingData.price || "0";
+        qtyInput.value = existingData.qty || "1";
+        discountInput.value = existingData.discount || "0";
+      }
+
+      function updateRowTotal() {
+        const price = parseFloat(priceInput.value) || 0;
+        const qty = parseFloat(qtyInput.value) || 0;
+        let discountPercent = parseFloat(discountInput.value);
+
+        if (isNaN(discountPercent) || discountPercent < 0) {
+          discountPercent = 0;
+        }
+        if (discountPercent > 100) {
+          discountPercent = 100;
+          discountInput.value = 100;
+        }
+
+        const lineSubtotal = price * qty;
+        const lineDiscount = lineSubtotal * (discountPercent / 100);
+        const lineAfter = lineSubtotal - lineDiscount;
+
+        row.querySelector(".row-total").textContent = lineAfter.toFixed(2);
+        saveState();
+      }
+
+      priceInput.addEventListener("input", () => {
+        updateRowTotal();
+      });
+      qtyInput.addEventListener("input", () => {
+        updateRowTotal();
+      });
+      discountInput.addEventListener("input", () => {
+        updateRowTotal();
+      });
+      descInput.addEventListener("input", () => {
+        saveState();
+      });
+
+      removeBtn.addEventListener("click", () => {
+        row.remove();
+        calculateTotals();
+        saveState();
+      });
+
+      updateRowTotal();
+    }
+
+    // חישוב סיכומים
+    function calculateTotals() {
+      errorMsg.textContent = "";
+
+      const rows = itemsBody.querySelectorAll("tr");
+      if (rows.length === 0) {
+        errorMsg.textContent = "הוסף לפחות פריט אחד כדי לחשב.";
+        subtotalDisplay.textContent = "0.00 ₪";
+        discountAmountDisplay.textContent = "0.00 ₪";
+        totalDisplay.textContent = "0.00 ₪";
+        saveState();
+        return;
+      }
+
+      let subtotal = 0;
+      let totalDiscount = 0;
+      let totalAfter = 0;
+
+      rows.forEach(row => {
+        const priceInput = row.querySelector(".price-input");
+        const qtyInput = row.querySelector(".qty-input");
+        const discountInput = row.querySelector(".discount-input");
+
+        const price = parseFloat(priceInput.value);
+        const qty = parseFloat(qtyInput.value);
+        let discountPercent = parseFloat(discountInput.value);
+
+        if (isNaN(price) || price < 0 || isNaN(qty) || qty < 0) {
+          return;
+        }
+
+        if (isNaN(discountPercent) || discountPercent < 0) {
+          discountPercent = 0;
+        }
+        if (discountPercent > 100) {
+          discountPercent = 100;
+          discountInput.value = 100;
+        }
+
+        const lineSubtotal = price * qty;
+        const lineDiscount = lineSubtotal * (discountPercent / 100);
+        const lineAfter = lineSubtotal - lineDiscount;
+
+        subtotal += lineSubtotal;
+        totalDiscount += lineDiscount;
+        totalAfter += lineAfter;
+
+        row.querySelector(".row-total").textContent = lineAfter.toFixed(2);
+      });
+
+      subtotalDisplay.textContent = subtotal.toFixed(2) + " ₪";
+      discountAmountDisplay.textContent = totalDiscount.toFixed(2) + " ₪";
+      totalDisplay.textContent = totalAfter.toFixed(2) + " ₪";
+
+      saveState();
+    }
+
+    // כפתור הדפסה או PDF
+    printBtn.addEventListener("click", () => {
+      calculateTotals();
+      window.print();
+    });
+
+    addItemBtn.addEventListener("click", () => {
+      addItemRow();
+      saveState();
+    });
+
+    calcBtn.addEventListener("click", () => {
+      calculateTotals();
+    });
+
+    // רישום Service Worker ל PWA
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("service-worker.js")
+          .catch(err => {
+            console.log("Service worker registration failed", err);
+          });
+      });
+    }
+
+    // טעינה ראשונית
+    loadState();
+  </script>
+</body>
+</html>
