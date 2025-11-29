@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>כמה זה באמת עולה לי ?</title>
+<h1>כמה זה באמת עולה לי ?</h1>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#3b82f6" />
   <link rel="manifest" href="manifest.json" />
@@ -14,6 +14,19 @@
       padding: 0;
       direction: rtl;
     }
+	.logo-container {
+  text-align: center;
+  margin-bottom: 6px; /* רווח מאוד קטן, שורה אחת */
+}
+
+.logo-img {
+  width: 360px; /* היה 240 — עכשיו גודל 150 אחוז נוספים */
+  max-width: 85%;
+  height: auto;
+  display: inline-block;
+}
+
+
 
     .app-container {
       max-width: 900px;
@@ -24,31 +37,20 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.07);
     }
 
-    .logo-container {
-      text-align: center;
-      margin-bottom: 4px;
-    }
+h1 {
+  margin-top: 0;
+  margin-bottom: 6px; /* רווח מינימלי בלבד */
+  text-align: center;
+  color: #111827;
+  font-size: 1.7rem;
+  line-height: 1.2;
+}
 
-    .logo-img {
-      width: 360px;
-      max-width: 90%;
-      height: auto;
-      display: inline-block;
-    }
-
-    h1 {
-      margin-top: 0;
-      margin-bottom: 4px;
-      text-align: center;
-      color: #111827;
-      font-size: 1.7rem;
-      line-height: 1.2;
-    }
 
     .items-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      margin-top: 16px;
     }
 
     .items-table th, .items-table td {
@@ -130,7 +132,7 @@
       flex-wrap: wrap;
       gap: 12px;
       align-items: center;
-      margin-top: 12px;
+      margin-top: 16px;
     }
 
     .controls-row .btn {
@@ -138,8 +140,8 @@
     }
 
     .summary {
-      margin-top: 16px;
-      padding-top: 10px;
+      margin-top: 20px;
+      padding-top: 12px;
       border-top: 1px solid #e5e7eb;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -173,6 +175,30 @@
       font-size: 1.1rem;
       color: #16a34a;
     }
+	
+	.currency-box {
+  background: #f2f4f7;
+  padding: 12px;
+  margin-top: 15px;
+  border-radius: 10px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.currency-box label {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.currency-box input, .currency-box select {
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
 
     .error-message {
       margin-top: 8px;
@@ -193,6 +219,7 @@
       }
     }
 
+    /* עיצוב ידידותי להדפסה או PDF */
     @media print {
       body {
         background: #ffffff;
@@ -210,12 +237,12 @@
 </head>
 <body>
   <div class="app-container">
-    <div class="logo-container">
-      <img src="logo.png" alt="M.Z ידע שווה זהב" class="logo-img" />
-    </div>
+  <div class="logo-container">
+  <img src="לוגו MZ.png" alt="MZ Logo" class="logo-img" />
+</div>
+    <h1>מחשבון סל קניות עם הנחה פר פריט</h1>
 
-    <h1>כמה זה באמת עולה לי ?</h1>
-
+    <!-- טבלת פריטים -->
     <table class="items-table" id="itemsTable">
       <thead>
         <tr>
@@ -233,13 +260,40 @@
 
     <button class="btn btn-secondary" id="addItemBtn">הוסף פריט</button>
 
+    <!-- כפתורים תחתונים -->
     <div class="controls-row">
       <button class="btn btn-primary" id="calcBtn">חישוב סופי</button>
       <button class="btn btn-secondary" id="printBtn">הדפס או שמור כ PDF</button>
     </div>
+	
+	<div class="currency-box">
+  <label>בחר מטבע:</label>
+  <select id="currencySelect">
+    <option value="ILS" selected>ש"ח</option>
+    <option value="USD">דולר</option>
+    <option value="EUR">אירו</option>
+  </select>
+
+  <label>הזן שער המרה:</label>
+  <input type="number" id="exchangeRate" value="1" step="0.0001" min="0">
+</div>
+
+<div class="summary">
+  <div class="summary-item">
+    <span class="label">סה״כ בש"ח</span>
+    <span class="value" id="totalILS">0.00 ₪</span>
+  </div>
+
+  <div class="summary-item highlight">
+    <span class="label">סה״כ במטבע שנבחר</span>
+    <span class="value" id="totalForeign">0.00</span>
+  </div>
+</div>
+
 
     <div class="error-message" id="errorMsg"></div>
 
+    <!-- סיכום -->
     <div class="summary">
       <div class="summary-item">
         <span class="label">סכום לפני הנחה</span>
@@ -269,6 +323,7 @@
     const discountAmountDisplay = document.getElementById("discountAmountDisplay");
     const totalDisplay = document.getElementById("totalDisplay");
 
+    // שמירת מצב בסל
     function saveState() {
       const rows = itemsBody.querySelectorAll("tr");
       const items = [];
@@ -289,11 +344,24 @@
       const data = { items, totals };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
+	
+function updateCurrencyConversion(finalTotalILS) {
+  const currency = document.getElementById("currencySelect").value;
+  const rate = parseFloat(document.getElementById("exchangeRate").value) || 1;
 
+  let symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : "₪";
+
+  const converted = finalTotalILS / rate;
+
+  document.getElementById("totalILS").textContent = finalTotalILS.toFixed(2) + " ₪";
+  document.getElementById("totalForeign").textContent = converted.toFixed(2) + " " + symbol;
+}
+
+    // טעינת מצב מהאחסון
     function loadState() {
       const dataStr = localStorage.getItem(STORAGE_KEY);
       if (!dataStr) {
-        addItemRow();
+        addItemRow(); // שורה אחת ברירת מחדל
         return;
       }
 
@@ -318,6 +386,7 @@
       }
     }
 
+    // הוספת שורת פריט חדשה
     function addItemRow(existingData) {
       const row = document.createElement("tr");
 
@@ -348,6 +417,7 @@
       const discountInput = row.querySelector(".discount-input");
       const removeBtn = row.querySelector(".remove-btn");
 
+      // מילוי נתונים קיימים אם יש
       if (existingData) {
         descInput.value = existingData.desc || "";
         priceInput.value = existingData.price || "0";
@@ -376,10 +446,18 @@
         saveState();
       }
 
-      priceInput.addEventListener("input", updateRowTotal);
-      qtyInput.addEventListener("input", updateRowTotal);
-      discountInput.addEventListener("input", updateRowTotal);
-      descInput.addEventListener("input", saveState);
+      priceInput.addEventListener("input", () => {
+        updateRowTotal();
+      });
+      qtyInput.addEventListener("input", () => {
+        updateRowTotal();
+      });
+      discountInput.addEventListener("input", () => {
+        updateRowTotal();
+      });
+      descInput.addEventListener("input", () => {
+        saveState();
+      });
 
       removeBtn.addEventListener("click", () => {
         row.remove();
@@ -390,6 +468,7 @@
       updateRowTotal();
     }
 
+    // חישוב סיכומים
     function calculateTotals() {
       errorMsg.textContent = "";
 
@@ -442,10 +521,13 @@
       subtotalDisplay.textContent = subtotal.toFixed(2) + " ₪";
       discountAmountDisplay.textContent = totalDiscount.toFixed(2) + " ₪";
       totalDisplay.textContent = totalAfter.toFixed(2) + " ₪";
+	  updateCurrencyConversion(totalAfter);
+
 
       saveState();
     }
 
+    // כפתור הדפסה או PDF
     printBtn.addEventListener("click", () => {
       calculateTotals();
       window.print();
@@ -460,6 +542,7 @@
       calculateTotals();
     });
 
+    // רישום Service Worker ל PWA
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
         navigator.serviceWorker
@@ -470,7 +553,9 @@
       });
     }
 
+    // טעינה ראשונית
     loadState();
   </script>
 </body>
 </html>
+
