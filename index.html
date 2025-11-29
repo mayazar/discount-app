@@ -278,6 +278,9 @@
       <input type="number" id="usdRate" value="3.6" step="0.0001" min="0" />
       <label for="eurRate">שער אירו (EUR → ש"ח):</label>
       <input type="number" id="eurRate" value="4.0" step="0.0001" min="0" />
+      <button type="button" class="btn btn-small btn-secondary" id="lockRatesBtn">
+        קבע שערים
+      </button>
     </div>
 
     <div class="error-message" id="errorMsg"></div>
@@ -299,7 +302,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "discountCartV4";
+    const STORAGE_KEY = "discountCartV5";
 
     const itemsBody = document.getElementById("itemsBody");
     const addItemBtn = document.getElementById("addItemBtn");
@@ -313,22 +316,32 @@
 
     const usdRateInput = document.getElementById("usdRate");
     const eurRateInput = document.getElementById("eurRate");
+    const lockRatesBtn = document.getElementById("lockRatesBtn");
+
+    let ratesLocked = false;
+
+    function applyRatesLockUI() {
+      usdRateInput.disabled = ratesLocked;
+      eurRateInput.disabled = ratesLocked;
+      lockRatesBtn.textContent = ratesLocked ? "בטל קיבוע שערים" : "קבע שערים";
+    }
 
     function saveState() {
       const rows = itemsBody.querySelectorAll("tr");
       const items = [];
       rows.forEach(row => {
-        const desc = row.querySelector(".desc-input").value || "";
-        const price = row.querySelector(".price-input").value || "0";
-        const qty = row.querySelector(".qty-input").value || "1";
-        const discount = row.querySelector(".discount-input").value || "0";
-        const currency = row.querySelector(".currency-select").value || "ILS";
+        const desc = row.querySelector(".desc-input")?.value || "";
+        const price = row.querySelector(".price-input")?.value || "0";
+        const qty = row.querySelector(".qty-input")?.value || "1";
+        const discount = row.querySelector(".discount-input")?.value || "0";
+        const currency = row.querySelector(".currency-select")?.value || "ILS";
         items.push({ desc, price, qty, discount, currency });
       });
 
       const rates = {
         usd: usdRateInput.value || "3.6",
-        eur: eurRateInput.value || "4.0"
+        eur: eurRateInput.value || "4.0",
+        locked: ratesLocked
       };
 
       const data = { items, rates };
@@ -352,6 +365,8 @@
           if (data.rates) {
             usdRateInput.value = data.rates.usd || "3.6";
             eurRateInput.value = data.rates.eur || "4.0";
+            ratesLocked = !!data.rates.locked;
+            applyRatesLockUI();
           }
 
           calculateTotals();
@@ -446,28 +461,16 @@
         row.querySelector(".row-total").textContent =
           lineAfterForeign.toFixed(2) + " " + symbol;
 
-        row.dataset.lineAfterILS = lineAfterILS;
-        row.dataset.lineSubtotalILS = (lineSubtotalForeign * rateToILS).toFixed(4);
-        row.dataset.lineDiscountILS = (lineSubtotalForeign * rateToILS * (discountPercent / 100)).toFixed(4);
+        row.dataset.lineAfterILS = lineAfterILS.toString();
 
         saveState();
       }
 
-      priceInput.addEventListener("input", () => {
-        updateRowTotal();
-      });
-      qtyInput.addEventListener("input", () => {
-        updateRowTotal();
-      });
-      discountInput.addEventListener("input", () => {
-        updateRowTotal();
-      });
-      currencySelect.addEventListener("change", () => {
-        updateRowTotal();
-      });
-      descInput.addEventListener("input", () => {
-        saveState();
-      });
+      priceInput.addEventListener("input", updateRowTotal);
+      qtyInput.addEventListener("input", updateRowTotal);
+      discountInput.addEventListener("input", updateRowTotal);
+      currencySelect.addEventListener("change", updateRowTotal);
+      descInput.addEventListener("input", saveState);
 
       removeBtn.addEventListener("click", () => {
         row.remove();
@@ -565,6 +568,23 @@
       calculateTotals();
     });
 
+    usdRateInput.addEventListener("input", () => {
+      if (!ratesLocked) {
+        calculateTotals();
+      }
+    });
+    eurRateInput.addEventListener("input", () => {
+      if (!ratesLocked) {
+        calculateTotals();
+      }
+    });
+
+    lockRatesBtn.addEventListener("click", () => {
+      ratesLocked = !ratesLocked;
+      applyRatesLockUI();
+      saveState();
+    });
+
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
         navigator.serviceWorker
@@ -574,13 +594,6 @@
           });
       });
     }
-
-    usdRateInput.addEventListener("input", () => {
-      calculateTotals();
-    });
-    eurRateInput.addEventListener("input", () => {
-      calculateTotals();
-    });
 
     loadState();
   </script>
