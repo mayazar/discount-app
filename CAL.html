@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-<h1>כמה זה באמת עולה לי ?</h1>
+  <title>כמה זה באמת עולה לי ?</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#3b82f6" />
   <link rel="manifest" href="manifest.json" />
@@ -14,19 +14,6 @@
       padding: 0;
       direction: rtl;
     }
-	.logo-container {
-  text-align: center;
-  margin-bottom: 6px; /* רווח מאוד קטן, שורה אחת */
-}
-
-.logo-img {
-  width: 360px; /* היה 240 — עכשיו גודל 150 אחוז נוספים */
-  max-width: 85%;
-  height: auto;
-  display: inline-block;
-}
-
-
 
     .app-container {
       max-width: 900px;
@@ -37,20 +24,31 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.07);
     }
 
-h1 {
-  margin-top: 0;
-  margin-bottom: 6px; /* רווח מינימלי בלבד */
-  text-align: center;
-  color: #111827;
-  font-size: 1.7rem;
-  line-height: 1.2;
-}
+    .logo-container {
+      text-align: center;
+      margin-bottom: 4px;
+    }
 
+    .logo-img {
+      width: 360px;
+      max-width: 90%;
+      height: auto;
+      display: inline-block;
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 4px;
+      text-align: center;
+      color: #111827;
+      font-size: 1.7rem;
+      line-height: 1.2;
+    }
 
     .items-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 16px;
+      margin-top: 10px;
     }
 
     .items-table th, .items-table td {
@@ -66,7 +64,8 @@ h1 {
     }
 
     .items-table input[type="number"],
-    .items-table input[type="text"] {
+    .items-table input[type="text"],
+    .items-table select {
       width: 100%;
       box-sizing: border-box;
       padding: 6px;
@@ -76,7 +75,8 @@ h1 {
     }
 
     .items-table input[type="number"]:focus,
-    .items-table input[type="text"]:focus {
+    .items-table input[type="text"]:focus,
+    .items-table select:focus {
       outline: none;
       border-color: #3b82f6;
       box-shadow: 0 0 0 1px #bfdbfe;
@@ -132,16 +132,40 @@ h1 {
       flex-wrap: wrap;
       gap: 12px;
       align-items: center;
-      margin-top: 16px;
+      margin-top: 12px;
     }
 
     .controls-row .btn {
       margin-top: 0;
     }
 
+    .rates-box {
+      margin-top: 14px;
+      background: #f3f4ff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    .rates-box label {
+      color: #374151;
+    }
+
+    .rates-box input {
+      width: 90px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      border: 1px solid #cbd5f5;
+      font-size: 0.85rem;
+    }
+
     .summary {
-      margin-top: 20px;
-      padding-top: 12px;
+      margin-top: 16px;
+      padding-top: 10px;
       border-top: 1px solid #e5e7eb;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -175,30 +199,6 @@ h1 {
       font-size: 1.1rem;
       color: #16a34a;
     }
-	
-	.currency-box {
-  background: #f2f4f7;
-  padding: 12px;
-  margin-top: 15px;
-  border-radius: 10px;
-  display: flex;
-  gap: 15px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.currency-box label {
-  font-size: 0.9rem;
-  color: #333;
-}
-
-.currency-box input, .currency-box select {
-  padding: 6px 10px;
-  font-size: 0.9rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
 
     .error-message {
       margin-top: 8px;
@@ -217,9 +217,13 @@ h1 {
         margin: 10px;
         padding: 14px;
       }
+
+      .rates-box {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
 
-    /* עיצוב ידידותי להדפסה או PDF */
     @media print {
       body {
         background: #ffffff;
@@ -229,27 +233,28 @@ h1 {
         margin: 0;
         max-width: 100%;
       }
-      .controls-row, #addItemBtn, #errorMsg {
-        display: none !important;
+      .controls-row, #addItemBtn, #errorMsg, .rates-box {
+        display: none !ורבחט;
       }
     }
   </style>
 </head>
 <body>
   <div class="app-container">
-  <div class="logo-container">
-  <img src="לוגו MZ.png" alt="MZ Logo" class="logo-img" />
-</div>
-    <h1>מחשבון סל קניות עם הנחה פר פריט</h1>
+    <div class="logo-container">
+      <img src="logo.png" alt="M.Z ידע שווה זהב" class="logo-img" />
+    </div>
 
-    <!-- טבלת פריטים -->
+    <h1>כמה זה באמת עולה לי ?</h1>
+
     <table class="items-table" id="itemsTable">
       <thead>
         <tr>
           <th>תיאור פריט</th>
-          <th>מחיר ליחידה (שח)</th>
+          <th>מחיר ליחידה</th>
+          <th>מטבע</th>
           <th>כמות</th>
-          <th>אחוז הנחה לפריט</th>
+          <th>אחוז הנחה</th>
           <th>סכום שורה לאחר הנחה (שח)</th>
           <th>הסר</th>
         </tr>
@@ -260,58 +265,38 @@ h1 {
 
     <button class="btn btn-secondary" id="addItemBtn">הוסף פריט</button>
 
-    <!-- כפתורים תחתונים -->
     <div class="controls-row">
       <button class="btn btn-primary" id="calcBtn">חישוב סופי</button>
       <button class="btn btn-secondary" id="printBtn">הדפס או שמור כ PDF</button>
     </div>
-	
-	<div class="currency-box">
-  <label>בחר מטבע:</label>
-  <select id="currencySelect">
-    <option value="ILS" selected>ש"ח</option>
-    <option value="USD">דולר</option>
-    <option value="EUR">אירו</option>
-  </select>
 
-  <label>הזן שער המרה:</label>
-  <input type="number" id="exchangeRate" value="1" step="0.0001" min="0">
-</div>
-
-<div class="summary">
-  <div class="summary-item">
-    <span class="label">סה״כ בש"ח</span>
-    <span class="value" id="totalILS">0.00 ₪</span>
-  </div>
-
-  <div class="summary-item highlight">
-    <span class="label">סה״כ במטבע שנבחר</span>
-    <span class="value" id="totalForeign">0.00</span>
-  </div>
-</div>
-
+    <div class="rates-box">
+      <label for="usdRate">שער דולר (USD → ש"ח):</label>
+      <input type="number" id="usdRate" value="3.6" step="0.0001" min="0" />
+      <label for="eurRate">שער אירו (EUR → ש"ח):</label>
+      <input type="number" id="eurRate" value="4.0" step="0.0001" min="0" />
+    </div>
 
     <div class="error-message" id="errorMsg"></div>
 
-    <!-- סיכום -->
     <div class="summary">
       <div class="summary-item">
-        <span class="label">סכום לפני הנחה</span>
+        <span class="label">סכום לפני הנחה (שח)</span>
         <span class="value" id="subtotalDisplay">0.00 ₪</span>
       </div>
       <div class="summary-item">
-        <span class="label">סך כל ההנחה</span>
+        <span class="label">סך כל ההנחה (שח)</span>
         <span class="value" id="discountAmountDisplay">0.00 ₪</span>
       </div>
       <div class="summary-item highlight">
-        <span class="label">סכום סופי לתשלום</span>
+        <span class="label">סכום סופי לתשלום (שח)</span>
         <span class="value" id="totalDisplay">0.00 ₪</span>
       </div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = "discountCartV1";
+    const STORAGE_KEY = "discountCartV3";
 
     const itemsBody = document.getElementById("itemsBody");
     const addItemBtn = document.getElementById("addItemBtn");
@@ -323,7 +308,9 @@ h1 {
     const discountAmountDisplay = document.getElementById("discountAmountDisplay");
     const totalDisplay = document.getElementById("totalDisplay");
 
-    // שמירת מצב בסל
+    const usdRateInput = document.getElementById("usdRate");
+    const eurRateInput = document.getElementById("eurRate");
+
     function saveState() {
       const rows = itemsBody.querySelectorAll("tr");
       const items = [];
@@ -332,7 +319,8 @@ h1 {
         const price = row.querySelector(".price-input").value || "0";
         const qty = row.querySelector(".qty-input").value || "1";
         const discount = row.querySelector(".discount-input").value || "0";
-        items.push({ desc, price, qty, discount });
+        const currency = row.querySelector(".currency-select").value || "ILS";
+        items.push({ desc, price, qty, discount, currency });
       });
 
       const totals = {
@@ -341,27 +329,19 @@ h1 {
         total: totalDisplay.textContent
       };
 
-      const data = { items, totals };
+      const rates = {
+        usd: usdRateInput.value || "3.6",
+        eur: eurRateInput.value || "4.0"
+      };
+
+      const data = { items, totals, rates };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
-	
-function updateCurrencyConversion(finalTotalILS) {
-  const currency = document.getElementById("currencySelect").value;
-  const rate = parseFloat(document.getElementById("exchangeRate").value) || 1;
 
-  let symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : "₪";
-
-  const converted = finalTotalILS / rate;
-
-  document.getElementById("totalILS").textContent = finalTotalILS.toFixed(2) + " ₪";
-  document.getElementById("totalForeign").textContent = converted.toFixed(2) + " " + symbol;
-}
-
-    // טעינת מצב מהאחסון
     function loadState() {
       const dataStr = localStorage.getItem(STORAGE_KEY);
       if (!dataStr) {
-        addItemRow(); // שורה אחת ברירת מחדל
+        addItemRow();
         return;
       }
 
@@ -377,6 +357,11 @@ function updateCurrencyConversion(finalTotalILS) {
             discountAmountDisplay.textContent = data.totals.discount || "0.00 ₪";
             totalDisplay.textContent = data.totals.total || "0.00 ₪";
           }
+
+          if (data.rates) {
+            usdRateInput.value = data.rates.usd || "3.6";
+            eurRateInput.value = data.rates.eur || "4.0";
+          }
         } else {
           addItemRow();
         }
@@ -386,7 +371,6 @@ function updateCurrencyConversion(finalTotalILS) {
       }
     }
 
-    // הוספת שורת פריט חדשה
     function addItemRow(existingData) {
       const row = document.createElement("tr");
 
@@ -396,6 +380,13 @@ function updateCurrencyConversion(finalTotalILS) {
         </td>
         <td>
           <input type="number" class="price-input" min="0" step="0.01" value="0" />
+        </td>
+        <td>
+          <select class="currency-select">
+            <option value="ILS">ש"ח</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+          </select>
         </td>
         <td>
           <input type="number" class="qty-input" min="0" step="1" value="1" />
@@ -415,20 +406,27 @@ function updateCurrencyConversion(finalTotalILS) {
       const priceInput = row.querySelector(".price-input");
       const qtyInput = row.querySelector(".qty-input");
       const discountInput = row.querySelector(".discount-input");
+      const currencySelect = row.querySelector(".currency-select");
       const removeBtn = row.querySelector(".remove-btn");
 
-      // מילוי נתונים קיימים אם יש
       if (existingData) {
         descInput.value = existingData.desc || "";
         priceInput.value = existingData.price || "0";
         qtyInput.value = existingData.qty || "1";
         discountInput.value = existingData.discount || "0";
+        if (existingData.currency) {
+          currencySelect.value = existingData.currency;
+        }
       }
 
       function updateRowTotal() {
         const price = parseFloat(priceInput.value) || 0;
         const qty = parseFloat(qtyInput.value) || 0;
         let discountPercent = parseFloat(discountInput.value);
+        let currency = currencySelect.value;
+
+        let usdRate = parseFloat(usdRateInput.value) || 1;
+        let eurRate = parseFloat(eurRateInput.value) || 1;
 
         if (isNaN(discountPercent) || discountPercent < 0) {
           discountPercent = 0;
@@ -438,26 +436,28 @@ function updateCurrencyConversion(finalTotalILS) {
           discountInput.value = 100;
         }
 
-        const lineSubtotal = price * qty;
-        const lineDiscount = lineSubtotal * (discountPercent / 100);
-        const lineAfter = lineSubtotal - lineDiscount;
+        const lineSubtotalForeign = price * qty;
 
-        row.querySelector(".row-total").textContent = lineAfter.toFixed(2);
+        let rateToILS = 1;
+        if (currency === "USD") {
+          rateToILS = usdRate;
+        } else if (currency === "EUR") {
+          rateToILS = eurRate;
+        }
+
+        const lineSubtotalILS = lineSubtotalForeign * rateToILS;
+        const lineDiscountILS = lineSubtotalILS * (discountPercent / 100);
+        const lineAfterILS = lineSubtotalILS - lineDiscountILS;
+
+        row.querySelector(".row-total").textContent = lineAfterILS.toFixed(2);
         saveState();
       }
 
-      priceInput.addEventListener("input", () => {
-        updateRowTotal();
-      });
-      qtyInput.addEventListener("input", () => {
-        updateRowTotal();
-      });
-      discountInput.addEventListener("input", () => {
-        updateRowTotal();
-      });
-      descInput.addEventListener("input", () => {
-        saveState();
-      });
+      priceInput.addEventListener("input", updateRowTotal);
+      qtyInput.addEventListener("input", updateRowTotal);
+      discountInput.addEventListener("input", updateRowTotal);
+      currencySelect.addEventListener("change", updateRowTotal);
+      descInput.addEventListener("input", saveState);
 
       removeBtn.addEventListener("click", () => {
         row.remove();
@@ -468,7 +468,6 @@ function updateCurrencyConversion(finalTotalILS) {
       updateRowTotal();
     }
 
-    // חישוב סיכומים
     function calculateTotals() {
       errorMsg.textContent = "";
 
@@ -482,18 +481,23 @@ function updateCurrencyConversion(finalTotalILS) {
         return;
       }
 
-      let subtotal = 0;
-      let totalDiscount = 0;
-      let totalAfter = 0;
+      let subtotalILS = 0;
+      let totalDiscountILS = 0;
+      let totalAfterILS = 0;
+
+      let usdRate = parseFloat(usdRateInput.value) || 1;
+      let eurRate = parseFloat(eurRateInput.value) || 1;
 
       rows.forEach(row => {
         const priceInput = row.querySelector(".price-input");
         const qtyInput = row.querySelector(".qty-input");
         const discountInput = row.querySelector(".discount-input");
+        const currencySelect = row.querySelector(".currency-select");
 
         const price = parseFloat(priceInput.value);
         const qty = parseFloat(qtyInput.value);
         let discountPercent = parseFloat(discountInput.value);
+        let currency = currencySelect.value;
 
         if (isNaN(price) || price < 0 || isNaN(qty) || qty < 0) {
           return;
@@ -507,27 +511,33 @@ function updateCurrencyConversion(finalTotalILS) {
           discountInput.value = 100;
         }
 
-        const lineSubtotal = price * qty;
-        const lineDiscount = lineSubtotal * (discountPercent / 100);
-        const lineAfter = lineSubtotal - lineDiscount;
+        const lineSubtotalForeign = price * qty;
 
-        subtotal += lineSubtotal;
-        totalDiscount += lineDiscount;
-        totalAfter += lineAfter;
+        let rateToILS = 1;
+        if (currency === "USD") {
+          rateToILS = usdRate;
+        } else if (currency === "EUR") {
+          rateToILS = eurRate;
+        }
 
-        row.querySelector(".row-total").textContent = lineAfter.toFixed(2);
+        const lineSubtotalILS = lineSubtotalForeign * rateToILS;
+        const lineDiscountILS = lineSubtotalILS * (discountPercent / 100);
+        const lineAfterILS = lineSubtotalILS - lineDiscountILS;
+
+        subtotalILS += lineSubtotalILS;
+        totalDiscountILS += lineDiscountILS;
+        totalAfterILS += lineAfterILS;
+
+        row.querySelector(".row-total").textContent = lineAfterILS.toFixed(2);
       });
 
-      subtotalDisplay.textContent = subtotal.toFixed(2) + " ₪";
-      discountAmountDisplay.textContent = totalDiscount.toFixed(2) + " ₪";
-      totalDisplay.textContent = totalAfter.toFixed(2) + " ₪";
-	  updateCurrencyConversion(totalAfter);
-
+      subtotalDisplay.textContent = subtotalILS.toFixed(2) + " ₪";
+      discountAmountDisplay.textContent = totalDiscountILS.toFixed(2) + " ₪";
+      totalDisplay.textContent = totalAfterILS.toFixed(2) + " ₪";
 
       saveState();
     }
 
-    // כפתור הדפסה או PDF
     printBtn.addEventListener("click", () => {
       calculateTotals();
       window.print();
@@ -542,7 +552,6 @@ function updateCurrencyConversion(finalTotalILS) {
       calculateTotals();
     });
 
-    // רישום Service Worker ל PWA
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
         navigator.serviceWorker
@@ -553,7 +562,13 @@ function updateCurrencyConversion(finalTotalILS) {
       });
     }
 
-    // טעינה ראשונית
+    usdRateInput.addEventListener("input", () => {
+      calculateTotals();
+    });
+    eurRateInput.addEventListener("input", () => {
+      calculateTotals();
+    });
+
     loadState();
   </script>
 </body>
