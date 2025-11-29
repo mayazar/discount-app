@@ -233,8 +233,11 @@
         margin: 0;
         max-width: 100%;
       }
-      .controls-row, #addItemBtn, #errorMsg, .rates-box {
-        display: none !ורבחט;
+      .controls-row,
+      #addItemBtn,
+      #errorMsg,
+      .rates-box {
+        display: none !important;
       }
     }
   </style>
@@ -255,7 +258,7 @@
           <th>מטבע</th>
           <th>כמות</th>
           <th>אחוז הנחה</th>
-          <th>סכום שורה לאחר הנחה (שח)</th>
+          <th>סכום שורה לאחר הנחה</th>
           <th>הסר</th>
         </tr>
       </thead>
@@ -296,7 +299,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "discountCartV3";
+    const STORAGE_KEY = "discountCartV4";
 
     const itemsBody = document.getElementById("itemsBody");
     const addItemBtn = document.getElementById("addItemBtn");
@@ -323,18 +326,12 @@
         items.push({ desc, price, qty, discount, currency });
       });
 
-      const totals = {
-        subtotal: subtotalDisplay.textContent,
-        discount: discountAmountDisplay.textContent,
-        total: totalDisplay.textContent
-      };
-
       const rates = {
         usd: usdRateInput.value || "3.6",
         eur: eurRateInput.value || "4.0"
       };
 
-      const data = { items, totals, rates };
+      const data = { items, rates };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
 
@@ -352,16 +349,12 @@
             addItemRow(item);
           });
 
-          if (data.totals) {
-            subtotalDisplay.textContent = data.totals.subtotal || "0.00 ₪";
-            discountAmountDisplay.textContent = data.totals.discount || "0.00 ₪";
-            totalDisplay.textContent = data.totals.total || "0.00 ₪";
-          }
-
           if (data.rates) {
             usdRateInput.value = data.rates.usd || "3.6";
             eurRateInput.value = data.rates.eur || "4.0";
           }
+
+          calculateTotals();
         } else {
           addItemRow();
         }
@@ -394,7 +387,7 @@
         <td>
           <input type="number" class="discount-input" min="0" max="100" step="0.1" value="0" />
         </td>
-        <td class="row-total">0.00</td>
+        <td class="row-total">0.00 ₪</td>
         <td>
           <button class="btn btn-small btn-secondary remove-btn">X</button>
         </td>
@@ -437,6 +430,8 @@
         }
 
         const lineSubtotalForeign = price * qty;
+        const lineDiscountForeign = lineSubtotalForeign * (discountPercent / 100);
+        const lineAfterForeign = lineSubtotalForeign - lineDiscountForeign;
 
         let rateToILS = 1;
         if (currency === "USD") {
@@ -445,19 +440,34 @@
           rateToILS = eurRate;
         }
 
-        const lineSubtotalILS = lineSubtotalForeign * rateToILS;
-        const lineDiscountILS = lineSubtotalILS * (discountPercent / 100);
-        const lineAfterILS = lineSubtotalILS - lineDiscountILS;
+        const lineAfterILS = lineAfterForeign * rateToILS;
 
-        row.querySelector(".row-total").textContent = lineAfterILS.toFixed(2);
+        const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : "₪";
+        row.querySelector(".row-total").textContent =
+          lineAfterForeign.toFixed(2) + " " + symbol;
+
+        row.dataset.lineAfterILS = lineAfterILS;
+        row.dataset.lineSubtotalILS = (lineSubtotalForeign * rateToILS).toFixed(4);
+        row.dataset.lineDiscountILS = (lineSubtotalForeign * rateToILS * (discountPercent / 100)).toFixed(4);
+
         saveState();
       }
 
-      priceInput.addEventListener("input", updateRowTotal);
-      qtyInput.addEventListener("input", updateRowTotal);
-      discountInput.addEventListener("input", updateRowTotal);
-      currencySelect.addEventListener("change", updateRowTotal);
-      descInput.addEventListener("input", saveState);
+      priceInput.addEventListener("input", () => {
+        updateRowTotal();
+      });
+      qtyInput.addEventListener("input", () => {
+        updateRowTotal();
+      });
+      discountInput.addEventListener("input", () => {
+        updateRowTotal();
+      });
+      currencySelect.addEventListener("change", () => {
+        updateRowTotal();
+      });
+      descInput.addEventListener("input", () => {
+        saveState();
+      });
 
       removeBtn.addEventListener("click", () => {
         row.remove();
@@ -528,7 +538,10 @@
         totalDiscountILS += lineDiscountILS;
         totalAfterILS += lineAfterILS;
 
-        row.querySelector(".row-total").textContent = lineAfterILS.toFixed(2);
+        const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : "₪";
+        const lineAfterForeign = lineAfterILS / rateToILS;
+        row.querySelector(".row-total").textContent =
+          lineAfterForeign.toFixed(2) + " " + symbol;
       });
 
       subtotalDisplay.textContent = subtotalILS.toFixed(2) + " ₪";
