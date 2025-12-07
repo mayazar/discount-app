@@ -267,25 +267,54 @@
     updateRow();
   }
 
-  function calculateTotals() {
-    let subtotal = 0;
-    let discountSum = 0;
-    let total = 0;
+function calculateTotals() {
+  let subtotalILS = 0;
+  let totalDiscountILS = 0;
+  let totalAfterILS = 0;
 
-    document.querySelectorAll("#itemsBody tr").forEach(row=>{
-      const ils = parseFloat(row.dataset.ils)||0;
-      total += ils;
-    });
+  const usdRate = parseFloat(usdRateInput.value) || 1;
+  const eurRate = parseFloat(eurRateInput.value) || 1;
 
-    document.getElementById("totalDisplay").textContent = 
-      total.toFixed(2) + " ₪";
+  document.querySelectorAll("#itemsBody tr").forEach(row => {
+    const price = parseFloat(row.querySelector(".price-input").value) || 0;
+    const qty = parseFloat(row.querySelector(".qty-input").value) || 0;
+    const discount = parseFloat(row.querySelector(".discount-input").value) || 0;
+    const currency = row.querySelector(".currency-select").value;
 
-    document.getElementById("subtotalDisplay").textContent = 
-      total.toFixed(2) + " ₪";
+    // סכום שורה לפני הנחה במטבע זר
+    const lineSubtotalForeign = price * qty;
 
-    document.getElementById("discountAmountDisplay").textContent =
-      "—";
-  }
+    // המרה לשקלים
+    let rate = 1;
+    if (currency === "USD") rate = usdRate;
+    if (currency === "EUR") rate = eurRate;
+
+    const lineSubtotalILS = lineSubtotalForeign * rate;
+
+    // הנחה בשקלים
+    const lineDiscountILS = lineSubtotalILS * (discount / 100);
+
+    // אחרי הנחה בשקלים
+    const lineAfterILS = lineSubtotalILS - lineDiscountILS;
+
+    subtotalILS += lineSubtotalILS;
+    totalDiscountILS += lineDiscountILS;
+    totalAfterILS += lineAfterILS;
+
+    // הצגה בשורה (במטבע המקורי)
+    const lineAfterForeign = lineAfterILS / rate;
+    const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : "₪";
+    row.querySelector(".row-total").textContent =
+      lineAfterForeign.toFixed(2) + " " + symbol;
+  });
+
+  subtotalDisplay.textContent = subtotalILS.toFixed(2) + " ₪";
+  discountAmountDisplay.textContent = totalDiscountILS.toFixed(2) + " ₪";
+  totalDisplay.textContent = totalAfterILS.toFixed(2) + " ₪";
+
+  save();
+}
+
 
   function save() {
     const rows = [...document.querySelectorAll("#itemsBody tr")].map(r=>({
