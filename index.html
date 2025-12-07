@@ -48,10 +48,11 @@
     .items-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      margin-top: 20px;
     }
 
-    .items-table th, .items-table td {
+    .items-table th,
+    .items-table td {
       padding: 8px 6px;
       text-align: center;
       border-bottom: 1px solid #e5e7eb;
@@ -74,6 +75,14 @@
       font-size: 0.9rem;
     }
 
+    .items-table input[type="number"]:focus,
+    .items-table input[type="text"]:focus,
+    .items-table select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 1px #bfdbfe;
+    }
+
     .btn {
       display: inline-flex;
       align-items: center;
@@ -85,11 +94,17 @@
       font-size: 0.9rem;
       font-weight: 500;
       margin-top: 10px;
+      transition: transform 0.05s ease, box-shadow 0.1s ease, background-color 0.15s ease;
     }
 
     .btn-primary {
       background: #3b82f6;
       color: #ffffff;
+      box-shadow: 0 2px 6px rgba(59,130,246,0.4);
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
     }
 
     .btn-secondary {
@@ -97,9 +112,27 @@
       color: #111827;
     }
 
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+
     .btn-small {
       padding: 4px 10px;
       font-size: 0.8rem;
+      box-shadow: none;
+      margin-top: 0;
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .controls-row .btn {
+      margin-top: 0;
     }
 
     .rates-box {
@@ -114,12 +147,24 @@
       font-size: 0.9rem;
     }
 
+    .rates-box label {
+      color: #374151;
+    }
+
+    .rates-box input {
+      width: 90px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      border: 1px solid #cbd5f5;
+      font-size: 0.85rem;
+    }
+
     .summary {
       margin-top: 16px;
       padding-top: 10px;
       border-top: 1px solid #e5e7eb;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 12px;
     }
 
@@ -129,22 +174,75 @@
       padding: 10px 12px;
     }
 
+    .summary-item span.label {
+      display: block;
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-bottom: 2px;
+    }
+
+    .summary-item span.value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
     .summary-item.highlight {
       background: #ecfdf5;
     }
 
+    .summary-item.highlight span.value {
+      font-size: 1.1rem;
+      color: #16a34a;
+    }
+
+    .error-message {
+      margin-top: 8px;
+      color: #b91c1c;
+      font-size: 0.85rem;
+      min-height: 1em;
+    }
+
+    @media (max-width: 600px) {
+      .items-table th,
+      .items-table td {
+        font-size: 0.8rem;
+        padding: 6px 4px;
+      }
+
+      .app-container {
+        margin: 10px;
+        padding: 14px;
+      }
+
+      .rates-box {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
     @media print {
-      .controls-row, #addItemBtn, #installBtn, .rates-box {
+      body {
+        background: #ffffff;
+      }
+      .app-container {
+        box-shadow: none;
+        margin: 0;
+        max-width: 100%;
+      }
+      .controls-row,
+      #addItemBtn,
+      #installBtn,
+      .rates-box {
         display: none !important;
       }
     }
   </style>
 </head>
-
 <body>
   <div class="app-container">
     <div class="logo-container">
-      <img src="logo.png" class="logo-img" />
+      <img src="logo.png" alt="M.Z ידע שווה זהב" class="logo-img" />
     </div>
 
     <h1>כמה זה באמת עולה לי ?</h1>
@@ -156,7 +254,7 @@
           <th>מחיר ליחידה</th>
           <th>מטבע</th>
           <th>כמות</th>
-          <th>הנחה</th>
+          <th>אחוז הנחה</th>
           <th>אחרי הנחה</th>
           <th>הסר</th>
         </tr>
@@ -168,231 +266,315 @@
 
     <div class="controls-row">
       <button class="btn btn-primary" id="calcBtn">חישוב סופי</button>
-      <button class="btn btn-secondary" id="printBtn">הדפס או PDF</button>
+      <button class="btn btn-secondary" id="printBtn">הדפס או שמור כ PDF</button>
     </div>
 
-    <button id="installBtn" class="btn btn-primary" style="display:none;margin-top:15px;">
+    <button id="installBtn" class="btn btn-primary" style="display:none; margin-top:12px;">
       התקן אפליקציה
     </button>
 
     <div class="rates-box">
-      <label>USD → ₪:</label>
-      <input type="number" id="usdRate" value="3.6" step="0.0001">
-      <label>EUR → ₪:</label>
-      <input type="number" id="eurRate" value="4.0" step="0.0001">
+      <label for="usdRate">USD → ₪:</label>
+      <input type="number" id="usdRate" value="3.6" step="0.0001" min="0" />
+      <label for="eurRate">EUR → ₪:</label>
+      <input type="number" id="eurRate" value="4.0" step="0.0001" min="0" />
       <button id="lockRatesBtn" class="btn btn-small btn-secondary">קבע שערים</button>
     </div>
 
+    <div class="error-message" id="errorMsg"></div>
+
     <div class="summary">
       <div class="summary-item">
-        <span class="label">לפני הנחה:</span>
+        <span class="label">סכום לפני הנחה (ש"ח)</span>
         <span class="value" id="subtotalDisplay">0.00 ₪</span>
       </div>
-
       <div class="summary-item">
-        <span class="label">סה״כ הנחה:</span>
+        <span class="label">סך כל ההנחה (ש"ח)</span>
         <span class="value" id="discountAmountDisplay">0.00 ₪</span>
       </div>
-
       <div class="summary-item highlight">
-        <span class="label">לתשלום:</span>
+        <span class="label">סכום סופי לתשלום (ש"ח)</span>
         <span class="value" id="totalDisplay">0.00 ₪</span>
       </div>
     </div>
   </div>
 
-<script>
-  const itemsBody = document.getElementById("itemsBody");
-  const usdRateInput = document.getElementById("usdRate");
-  const eurRateInput = document.getElementById("eurRate");
-  const lockRatesBtn = document.getElementById("lockRatesBtn");
+  <script>
+    const STORAGE_KEY = "discountAppV6";
 
-  let ratesLocked = false;
+    const itemsBody = document.getElementById("itemsBody");
+    const addItemBtn = document.getElementById("addItemBtn");
+    const calcBtn = document.getElementById("calcBtn");
+    const printBtn = document.getElementById("printBtn");
+    const errorMsg = document.getElementById("errorMsg");
 
-  function addItemRow(item={}) {
-    const row = document.createElement("tr");
+    const subtotalDisplay = document.getElementById("subtotalDisplay");
+    const discountAmountDisplay = document.getElementById("discountAmountDisplay");
+    const totalDisplay = document.getElementById("totalDisplay");
 
-    row.innerHTML = `
-      <td><input class="desc-input" type="text" value="${item.desc||""}"></td>
-      <td><input class="price-input" type="number" step="0.01" value="${item.price||0}"></td>
-      <td>
-        <select class="currency-select">
-          <option value="ILS">₪</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-        </select>
-      </td>
-      <td><input class="qty-input" type="number" value="${item.qty||1}"></td>
-      <td><input class="discount-input" type="number" step="0.1" value="${item.discount||0}"></td>
-      <td class="row-total">0</td>
-      <td><button class="btn btn-small btn-secondary remove-btn">X</button></td>
-    `;
+    const usdRateInput = document.getElementById("usdRate");
+    const eurRateInput = document.getElementById("eurRate");
+    const lockRatesBtn = document.getElementById("lockRatesBtn");
 
-    itemsBody.appendChild(row);
+    const installBtn = document.getElementById("installBtn");
 
-    row.querySelector(".currency-select").value = item.currency || "ILS";
+    let ratesLocked = false;
+    let deferredPrompt = null;
 
-    function updateRow() {
-      const price = parseFloat(row.querySelector(".price-input").value)||0;
-      const qty = parseFloat(row.querySelector(".qty-input").value)||0;
-      const discount = parseFloat(row.querySelector(".discount-input").value)||0;
-      const cur = row.querySelector(".currency-select").value;
-
-      const subtotalForeign = price * qty;
-      const afterForeign = subtotalForeign * (1 - discount/100);
-
-      const rate = cur==="USD"? parseFloat(usdRateInput.value):
-                   cur==="EUR"? parseFloat(eurRateInput.value): 1;
-
-      const afterILS = afterForeign * rate;
-      row.dataset.ils = afterILS;
-      const symbol = cur==="USD"? "$": cur==="EUR"? "€": "₪";
-
-      row.querySelector(".row-total").textContent =
-        afterForeign.toFixed(2) + " " + symbol;
-
-      save();
+    function applyRatesLockUI() {
+      usdRateInput.disabled = ratesLocked;
+      eurRateInput.disabled = ratesLocked;
+      lockRatesBtn.textContent = ratesLocked ? "בטל קיבוע" : "קבע שערים";
     }
 
-    row.querySelectorAll("input,select").forEach(el=>{
-      el.addEventListener("input", updateRow);
+    function saveState() {
+      const rows = itemsBody.querySelectorAll("tr");
+      const items = [];
+      rows.forEach(row => {
+        const desc = row.querySelector(".desc-input")?.value || "";
+        const price = row.querySelector(".price-input")?.value || "0";
+        const qty = row.querySelector(".qty-input")?.value || "1";
+        const discount = row.querySelector(".discount-input")?.value || "0";
+        const currency = row.querySelector(".currency-select")?.value || "ILS";
+        items.push({ desc, price, qty, discount, currency });
+      });
+
+      const data = {
+        items,
+        usdRate: usdRateInput.value || "3.6",
+        eurRate: eurRateInput.value || "4.0",
+        ratesLocked: ratesLocked
+      };
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function loadState() {
+      const dataStr = localStorage.getItem(STORAGE_KEY);
+      if (!dataStr) {
+        addItemRow();
+        return;
+      }
+
+      try {
+        const data = JSON.parse(dataStr);
+        if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+          data.items.forEach(item => addItemRow(item));
+        } else {
+          addItemRow();
+        }
+
+        if (data.usdRate) usdRateInput.value = data.usdRate;
+        if (data.eurRate) eurRateInput.value = data.eurRate;
+        ratesLocked = !!data.ratesLocked;
+        applyRatesLockUI();
+
+        calculateTotals();
+      } catch (e) {
+        console.error("Cannot parse stored data", e);
+        addItemRow();
+      }
+    }
+
+    function addItemRow(existingData) {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>
+          <input type="text" class="desc-input" placeholder="לדוגמה: מנויים" />
+        </td>
+        <td>
+          <input type="number" class="price-input" min="0" step="0.01" value="${existingData?.price || 0}" />
+        </td>
+        <td>
+          <select class="currency-select">
+            <option value="ILS">₪</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+          </select>
+        </td>
+        <td>
+          <input type="number" class="qty-input" min="0" step="1" value="${existingData?.qty || 1}" />
+        </td>
+        <td>
+          <input type="number" class="discount-input" min="0" max="100" step="0.1" value="${existingData?.discount || 0}" />
+        </td>
+        <td class="row-total">0.00 ₪</td>
+        <td>
+          <button class="btn btn-small btn-secondary remove-btn">X</button>
+        </td>
+      `;
+
+      itemsBody.appendChild(row);
+
+      const descInput = row.querySelector(".desc-input");
+      const priceInput = row.querySelector(".price-input");
+      const qtyInput = row.querySelector(".qty-input");
+      const discountInput = row.querySelector(".discount-input");
+      const currencySelect = row.querySelector(".currency-select");
+      const removeBtn = row.querySelector(".remove-btn");
+
+      if (existingData) {
+        descInput.value = existingData.desc || "";
+        if (existingData.currency) {
+          currencySelect.value = existingData.currency;
+        }
+      }
+
+      function updateRowTotals() {
+        const price = parseFloat(priceInput.value) || 0;
+        const qty = parseFloat(qtyInput.value) || 0;
+        let discountPercent = parseFloat(discountInput.value);
+        let currency = currencySelect.value;
+
+        if (isNaN(discountPercent) || discountPercent < 0) {
+          discountPercent = 0;
+        }
+        if (discountPercent > 100) {
+          discountPercent = 100;
+          discountInput.value = 100;
+        }
+
+        const lineSubtotalForeign = price * qty;
+
+        let rate = 1;
+        const usdRate = parseFloat(usdRateInput.value) || 1;
+        const eurRate = parseFloat(eurRateInput.value) || 1;
+
+        if (currency === "USD") rate = usdRate;
+        if (currency === "EUR") rate = eurRate;
+
+        const lineSubtotalILS = lineSubtotalForeign * rate;
+        const lineDiscountILS = lineSubtotalILS * (discountPercent / 100);
+        const lineAfterILS = lineSubtotalILS - lineDiscountILS;
+
+        // נשמור בשקלים לצורך סיכום
+        row.dataset.subtotalIls = lineSubtotalILS.toString();
+        row.dataset.discountIls = lineDiscountILS.toString();
+        row.dataset.afterIls = lineAfterILS.toString();
+
+        // לתצוגה בשורה במטבע המקורי
+        const lineAfterForeign = rate === 0 ? 0 : lineAfterILS / rate;
+        const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : "₪";
+
+        row.querySelector(".row-total").textContent =
+          lineAfterForeign.toFixed(2) + " " + symbol;
+
+        saveState();
+        calculateTotals();
+      }
+
+      priceInput.addEventListener("input", updateRowTotals);
+      qtyInput.addEventListener("input", updateRowTotals);
+      discountInput.addEventListener("input", updateRowTotals);
+      currencySelect.addEventListener("change", updateRowTotals);
+      descInput.addEventListener("input", saveState);
+
+      removeBtn.addEventListener("click", () => {
+        row.remove();
+        saveState();
+        calculateTotals();
+      });
+
+      updateRowTotals();
+    }
+
+    function calculateTotals() {
+      const rows = itemsBody.querySelectorAll("tr");
+      if (rows.length === 0) {
+        subtotalDisplay.textContent = "0.00 ₪";
+        discountAmountDisplay.textContent = "0.00 ₪";
+        totalDisplay.textContent = "0.00 ₪";
+        return;
+      }
+
+      let subtotalILS = 0;
+      let totalDiscountILS = 0;
+      let totalAfterILS = 0;
+
+      rows.forEach(row => {
+        const sub = parseFloat(row.dataset.subtotalIls) || 0;
+        const disc = parseFloat(row.dataset.discountIls) || 0;
+        const after = parseFloat(row.dataset.afterIls) || 0;
+
+        subtotalILS += sub;
+        totalDiscountILS += disc;
+        totalAfterILS += after;
+      });
+
+      subtotalDisplay.textContent = subtotalILS.toFixed(2) + " ₪";
+      discountAmountDisplay.textContent = totalDiscountILS.toFixed(2) + " ₪";
+      totalDisplay.textContent = totalAfterILS.toFixed(2) + " ₪";
+    }
+
+    // אירועי כפתורים ושערים
+    addItemBtn.addEventListener("click", () => {
+      addItemRow();
+      saveState();
+      calculateTotals();
     });
 
-    row.querySelector(".remove-btn").onclick = ()=>{
-      row.remove();
+    calcBtn.addEventListener("click", () => {
       calculateTotals();
-      save();
-    };
+    });
 
-    updateRow();
-  }
+    printBtn.addEventListener("click", () => {
+      calculateTotals();
+      window.print();
+    });
 
-function calculateTotals() {
-  let subtotalILS = 0;
-  let totalDiscountILS = 0;
-  let totalAfterILS = 0;
+    usdRateInput.addEventListener("input", () => {
+      if (!ratesLocked) {
+        saveState();
+        calculateTotals();
+      }
+    });
 
-  const usdRate = parseFloat(usdRateInput.value) || 1;
-  const eurRate = parseFloat(eurRateInput.value) || 1;
+    eurRateInput.addEventListener("input", () => {
+      if (!ratesLocked) {
+        saveState();
+        calculateTotals();
+      }
+    });
 
-  document.querySelectorAll("#itemsBody tr").forEach(row => {
-    const price = parseFloat(row.querySelector(".price-input").value) || 0;
-    const qty = parseFloat(row.querySelector(".qty-input").value) || 0;
-    const discount = parseFloat(row.querySelector(".discount-input").value) || 0;
-    const currency = row.querySelector(".currency-select").value;
+    lockRatesBtn.addEventListener("click", () => {
+      ratesLocked = !ratesLocked;
+      applyRatesLockUI();
+      saveState();
+    });
 
-    // סכום שורה לפני הנחה במטבע זר
-    const lineSubtotalForeign = price * qty;
+    // התקנת אפליקציה
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = "inline-flex";
+    });
 
-    // המרה לשקלים
-    let rate = 1;
-    if (currency === "USD") rate = usdRate;
-    if (currency === "EUR") rate = eurRate;
+    installBtn.addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice.outcome === "accepted") {
+        installBtn.style.display = "none";
+      }
+      deferredPrompt = null;
+    });
 
-    const lineSubtotalILS = lineSubtotalForeign * rate;
+    window.addEventListener("appinstalled", () => {
+      installBtn.style.display = "none";
+    });
 
-    // הנחה בשקלים
-    const lineDiscountILS = lineSubtotalILS * (discount / 100);
+    // Service worker
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js").catch((err) => {
+          console.log("Service worker registration failed", err);
+        });
+      });
+    }
 
-    // אחרי הנחה בשקלים
-    const lineAfterILS = lineSubtotalILS - lineDiscountILS;
-
-    subtotalILS += lineSubtotalILS;
-    totalDiscountILS += lineDiscountILS;
-    totalAfterILS += lineAfterILS;
-
-    // הצגה בשורה (במטבע המקורי)
-    const lineAfterForeign = lineAfterILS / rate;
-    const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : "₪";
-    row.querySelector(".row-total").textContent =
-      lineAfterForeign.toFixed(2) + " " + symbol;
-  });
-
-  subtotalDisplay.textContent = subtotalILS.toFixed(2) + " ₪";
-  discountAmountDisplay.textContent = totalDiscountILS.toFixed(2) + " ₪";
-  totalDisplay.textContent = totalAfterILS.toFixed(2) + " ₪";
-
-  save();
-}
-
-
-  function save() {
-    const rows = [...document.querySelectorAll("#itemsBody tr")].map(r=>({
-      desc:r.querySelector(".desc-input").value,
-      price:r.querySelector(".price-input").value,
-      qty:r.querySelector(".qty-input").value,
-      discount:r.querySelector(".discount-input").value,
-      currency:r.querySelector(".currency-select").value
-    }));
-
-    localStorage.setItem("discount-app", JSON.stringify({
-      items:rows,
-      usd:usdRateInput.value,
-      eur:eurRateInput.value,
-      locked:ratesLocked
-    }));
-  }
-
-  function load() {
-    const data = JSON.parse(localStorage.getItem("discount-app")||"{}");
-    (data.items||[]).forEach(addItemRow);
-
-    usdRateInput.value = data.usd||3.6;
-    eurRateInput.value = data.eur||4.0;
-    ratesLocked = !!data.locked;
-
-    applyRatesLockUI();
-  }
-
-  function applyRatesLockUI() {
-    usdRateInput.disabled = ratesLocked;
-    eurRateInput.disabled = ratesLocked;
-    lockRatesBtn.textContent = ratesLocked? "בטל קיבוע": "קבע שערים";
-  }
-
-  lockRatesBtn.onclick = ()=>{
-    ratesLocked = !ratesLocked;
-    applyRatesLockUI();
-    save();
-  };
-
-  document.getElementById("addItemBtn").onclick = ()=>{
-    addItemRow();
-  };
-
-  document.getElementById("calcBtn").onclick = calculateTotals;
-  document.getElementById("printBtn").onclick = ()=>window.print();
-
-  load();
-  calculateTotals();
-
-  // ===== התקנת אפליקציה =====
-
-  let deferredPrompt;
-  const installBtn = document.getElementById("installBtn");
-
-  window.addEventListener("beforeinstallprompt", (e)=>{
-    e.preventDefault();
-    deferredPrompt = e;
-    installBtn.style.display = "inline-flex";
-  });
-
-  installBtn.onclick = async ()=>{
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    installBtn.style.display = "none";
-    deferredPrompt = null;
-  };
-
-  window.addEventListener("appinstalled",()=>{
-    installBtn.style.display = "none";
-  });
-
-  // register service worker
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
-  }
-</script>
-
+    // התחלה
+    loadState();
+  </script>
 </body>
 </html>
