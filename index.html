@@ -353,6 +353,8 @@
       const dataStr = localStorage.getItem(STORAGE_KEY);
       if (!dataStr) {
         addItemRow();
+        calculateTotals();
+        saveState();
         return;
       }
 
@@ -373,6 +375,7 @@
       } catch (e) {
         console.error("Cannot parse stored data", e);
         addItemRow();
+        calculateTotals();
       }
     }
 
@@ -421,11 +424,55 @@
         }
       }
 
-      function updateRowTotals() {
+      function onRowChange() {
+        calculateTotals();
+        saveState();
+      }
+
+      priceInput.addEventListener("input", onRowChange);
+      qtyInput.addEventListener("input", onRowChange);
+      discountInput.addEventListener("input", onRowChange);
+      currencySelect.addEventListener("change", onRowChange);
+      descInput.addEventListener("input", saveState);
+
+      removeBtn.addEventListener("click", () => {
+        row.remove();
+        calculateTotals();
+        saveState();
+      });
+
+      // חישוב ראשוני לשורה
+      calculateTotals();
+      saveState();
+    }
+
+    function calculateTotals() {
+      const rows = itemsBody.querySelectorAll("tr");
+      if (rows.length === 0) {
+        subtotalDisplay.textContent = "0.00 ₪";
+        discountAmountDisplay.textContent = "0.00 ₪";
+        totalDisplay.textContent = "0.00 ₪";
+        return;
+      }
+
+      const usdRate = parseFloat(usdRateInput.value) || 1;
+      const eurRate = parseFloat(eurRateInput.value) || 1;
+
+      let subtotalILS = 0;
+      let totalDiscountILS = 0;
+      let totalAfterILS = 0;
+
+      rows.forEach(row => {
+        const priceInput = row.querySelector(".price-input");
+        const qtyInput = row.querySelector(".qty-input");
+        const discountInput = row.querySelector(".discount-input");
+        const currencySelect = row.querySelector(".currency-select");
+        const rowTotalCell = row.querySelector(".row-total");
+
         const price = parseFloat(priceInput.value) || 0;
         const qty = parseFloat(qtyInput.value) || 0;
         let discountPercent = parseFloat(discountInput.value);
-        let currency = currencySelect.value;
+        const currency = currencySelect.value;
 
         if (isNaN(discountPercent) || discountPercent < 0) {
           discountPercent = 0;
@@ -438,9 +485,6 @@
         const lineSubtotalForeign = price * qty;
 
         let rate = 1;
-        const usdRate = parseFloat(usdRateInput.value) || 1;
-        const eurRate = parseFloat(eurRateInput.value) || 1;
-
         if (currency === "USD") rate = usdRate;
         if (currency === "EUR") rate = eurRate;
 
@@ -448,58 +492,13 @@
         const lineDiscountILS = lineSubtotalILS * (discountPercent / 100);
         const lineAfterILS = lineSubtotalILS - lineDiscountILS;
 
-        // נשמור בשקלים לצורך סיכום
-        row.dataset.subtotalIls = lineSubtotalILS.toString();
-        row.dataset.discountIls = lineDiscountILS.toString();
-        row.dataset.afterIls = lineAfterILS.toString();
+        subtotalILS += lineSubtotalILS;
+        totalDiscountILS += lineDiscountILS;
+        totalAfterILS += lineAfterILS;
 
-        // לתצוגה בשורה במטבע המקורי
         const lineAfterForeign = rate === 0 ? 0 : lineAfterILS / rate;
         const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : "₪";
-
-        row.querySelector(".row-total").textContent =
-          lineAfterForeign.toFixed(2) + " " + symbol;
-
-        saveState();
-        calculateTotals();
-      }
-
-      priceInput.addEventListener("input", updateRowTotals);
-      qtyInput.addEventListener("input", updateRowTotals);
-      discountInput.addEventListener("input", updateRowTotals);
-      currencySelect.addEventListener("change", updateRowTotals);
-      descInput.addEventListener("input", saveState);
-
-      removeBtn.addEventListener("click", () => {
-        row.remove();
-        saveState();
-        calculateTotals();
-      });
-
-      updateRowTotals();
-    }
-
-    function calculateTotals() {
-      const rows = itemsBody.querySelectorAll("tr");
-      if (rows.length === 0) {
-        subtotalDisplay.textContent = "0.00 ₪";
-        discountAmountDisplay.textContent = "0.00 ₪";
-        totalDisplay.textContent = "0.00 ₪";
-        return;
-      }
-
-      let subtotalILS = 0;
-      let totalDiscountILS = 0;
-      let totalAfterILS = 0;
-
-      rows.forEach(row => {
-        const sub = parseFloat(row.dataset.subtotalIls) || 0;
-        const disc = parseFloat(row.dataset.discountIls) || 0;
-        const after = parseFloat(row.dataset.afterIls) || 0;
-
-        subtotalILS += sub;
-        totalDiscountILS += disc;
-        totalAfterILS += after;
+        rowTotalCell.textContent = lineAfterForeign.toFixed(2) + " " + symbol;
       });
 
       subtotalDisplay.textContent = subtotalILS.toFixed(2) + " ₪";
@@ -510,30 +509,32 @@
     // אירועי כפתורים ושערים
     addItemBtn.addEventListener("click", () => {
       addItemRow();
-      saveState();
       calculateTotals();
+      saveState();
     });
 
     calcBtn.addEventListener("click", () => {
       calculateTotals();
+      saveState();
     });
 
     printBtn.addEventListener("click", () => {
       calculateTotals();
+      saveState();
       window.print();
     });
 
     usdRateInput.addEventListener("input", () => {
       if (!ratesLocked) {
-        saveState();
         calculateTotals();
+        saveState();
       }
     });
 
     eurRateInput.addEventListener("input", () => {
       if (!ratesLocked) {
-        saveState();
         calculateTotals();
+        saveState();
       }
     });
 
